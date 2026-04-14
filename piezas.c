@@ -309,4 +309,14 @@ void mover_enemigos(struct Juego *juego) {
     }
 }
 
-bool verificar_estado_rey(struct Juego *juego) { return false; }
+bool verificar_estado_rey(struct Juego *juego) {
+    for(int y = 0; y < juego->t->H; y++){
+        for(int x = 0; x < juego->t->W; x++){
+            Celda *c = (Celda*)juego->t->celdas[y][x];
+            if (c->pieza != NULL && c->pieza->tipo == 'R'){
+                return false;
+            }
+        }
+    }
+    return true;
+}
