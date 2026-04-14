@@ -1,0 +1,30 @@
+# Archivos compilados
+*.o
+*.a
+*.so
+*.exe
+
+# Archivos ejecutables
+main
+juego
+
+# Archivos de depuración
+*.dSYM/
+*.su
+*.gch
+*.pch
+
+# Archivos del editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de compilación
+build/
+dist/
