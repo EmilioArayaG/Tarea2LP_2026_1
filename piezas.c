@@ -20,7 +20,7 @@ void spawn_nivel(struct Juego *juego, int nivel) {
     int y_p = 1;
     int x_p = rand() % juego->t->W;
     Pieza *peon = (Pieza*)malloc(sizeof(Pieza));
-    peon->tipo = 'P';
+    peon->tipo = 'C';
     peon->hp = 1;
     peon->x = x_p;
     peon->y = y_p;
@@ -58,6 +58,37 @@ void mover_enemigos(struct Juego *juego) {
                     c->pieza = NULL;
                     p->x = nx; p->y = ny; p->desplz = true;
                     dest->pieza = p;
+                }
+            } else if (p && p->tipo == 'C' && !p->desplz){
+                int s_x[8] = {1,2,2,1,-1,-2,-2,-1};
+                int s_y[8] = {-2,-1,1,2,2,1,-1,-2};
+                int mejor_x = p->x;
+                int mejor_y = p->y;
+                int dis_min = 9999;
+
+                for(int i = 0; i<8; i++){
+                    int nx = p->x + s_x[i];
+                    int ny = p->y + s_y[i];
+
+                    if(nx >= 0 && nx < t->W && ny >= 0 && ny < t->H){
+                        Celda *c_d = (Celda*)t->celdas[ny][nx];
+                        if (c_d->pieza == NULL || c_d->pieza->tipo == 'R'){
+                            int dis = abs(rey->x - nx) + abs(rey->y - ny);
+                            if (dis < dis_min){
+                                dis_min = dis;
+                                mejor_x = nx;
+                                mejor_y = ny;
+                            }
+                        }
+                    }
+                }
+                if (mejor_x != p->x || mejor_y != p->y){
+                    Celda *c_df = (Celda*)t->celdas[mejor_y][mejor_x];
+                    c->pieza = NULL;
+                    p->x = mejor_x;
+                    p->y = mejor_y;
+                    p->desplz = true;
+                    c_df->pieza = p;
                 }
             }
         }
