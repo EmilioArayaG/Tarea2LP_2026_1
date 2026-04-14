@@ -12,21 +12,110 @@ void spawn_nivel(struct Juego *juego, int nivel) {
     p_rey->x = x_r;
     p_rey->y = y_r;
     p_rey->desplz = false;
-    juego->jugador = p_rey;
     
+    juego->jugador = p_rey;
     Celda *c = (Celda*)juego->t->celdas[y_r][x_r];
     c->pieza = p_rey;
 
-    int y_p = 1;
-    int x_p = rand() % juego->t->W;
-    Pieza *peon = (Pieza*)malloc(sizeof(Pieza));
-    peon->tipo = 'C';
-    peon->hp = 1;
-    peon->x = x_p;
-    peon->y = y_p;
-    peon->desplz = false;
-    Celda *cp = (Celda*)juego->t->celdas[y_p][x_p];
-    cp->pieza = peon;
+    int cant_p = 0, cant_c = 0, cant_a = 0, cant_t = 0, cant_q = 0;
+    switch(nivel){
+        case 1:
+            cant_p = 4; cant_c = 2; cant_a = 2;
+            break;
+        case 2:
+            cant_p = 4; cant_c = 2; cant_t = 2;
+            break;
+        case 3:
+            cant_p = 2; cant_c = 1; cant_a = 1; cant_q = 1;
+            break;
+    }
+    for (int i = 0; i < cant_p; i++){
+        int r_x;
+        int r_y = 1;
+        while (true){
+            r_x = rand() % juego->t->W;
+            Celda *c_t = (Celda*)juego->t->celdas[r_y][r_x];
+            if (c_t->pieza == NULL){
+                break;
+            }
+        }
+        Pieza *p = (Pieza*)malloc(sizeof(Pieza));
+        p->tipo = 'P';
+        p->hp = 1;
+        p->x = r_x;
+        p->y = r_y;
+        p->desplz = false;
+        Celda *cp = (Celda*)juego->t->celdas[r_y][r_x];
+        cp->pieza = p;
+    }
+    for (int i = 0; i < cant_c; i++){
+        int r_x;
+        int r_y = 0;
+        while (true){
+            r_x = rand() % juego->t->W;
+            Celda *c_t = (Celda*)juego->t->celdas[r_y][r_x];
+            if (c_t->pieza == NULL) break;
+        }
+        Pieza *p = (Pieza*)malloc(sizeof(Pieza));
+        p->tipo = 'C';
+        p->hp = 2;
+        p->x = r_x;
+        p->y = r_y;
+        p->desplz = false;
+        Celda *cp = (Celda*)juego->t->celdas[r_y][r_x];
+        cp->pieza = p;
+    }
+    for(int i = 0; i < cant_a; i++){
+        int r_x;
+        int r_y = 0;
+        while (true){
+            r_x = rand() % juego->t->W;
+            Celda *c_t = (Celda*)juego->t->celdas[r_y][r_x];
+            if (c_t->pieza == NULL) break;
+        }
+        Pieza *p = (Pieza*)malloc(sizeof(Pieza));
+        p->tipo = 'A';
+        p->hp = 2;
+        p->x = r_x;
+        p->y = r_y;
+        p->desplz = false;
+        Celda *cp = (Celda*)juego->t->celdas[r_y][r_x];
+        cp->pieza = p;
+    }
+    for(int i = 0; i < cant_t; i++){
+        int r_x;
+        int r_y = 0;
+        while (true){
+            r_x = rand() % juego->t->W;
+            Celda *c_t = (Celda*)juego->t->celdas[r_y][r_x];
+            if (c_t->pieza == NULL) break;
+        }
+        Pieza *p = (Pieza*)malloc(sizeof(Pieza));
+        p->tipo = 'T';
+        p->hp = 4;
+        p->x = r_x;
+        p->y = r_y;
+        p->desplz = false;
+        Celda *cp = (Celda*)juego->t->celdas[r_y][r_x];
+        cp->pieza = p;
+    }
+    for(int i = 0; i < cant_q; i++){
+        int r_x;
+        int r_y = 0;
+        while (true){
+            r_x = rand() % juego->t->W;
+            Celda *c_t = (Celda*)juego->t->celdas[r_y][r_x];
+            if (c_t->pieza == NULL) break;
+        }
+        Pieza *p = (Pieza*)malloc(sizeof(Pieza));
+        p->tipo = 'Q';
+        p->hp = 3;
+        p->x = r_x;
+        p->y = r_y;
+        p->desplz = false;
+        Celda *cp = (Celda*)juego->t->celdas[r_y][r_x];
+        cp->pieza = p;
+    }
 }
 
 void mover_enemigos(struct Juego *juego) {
