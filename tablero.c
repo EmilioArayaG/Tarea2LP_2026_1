@@ -5,7 +5,7 @@
 #include "main.h"
 
 struct Tablero* tablero_crear(int ancho, int alto) {
-    Tablero *new_t = (struct Tablero*)malloc(sizeof(Tablero));
+    struct Tablero *new_t = (struct Tablero*)malloc(sizeof(struct Tablero));
     new_t->W = ancho;
     new_t->H = alto;
     new_t->celdas = (void***)malloc(sizeof(void**) * alto);
@@ -20,9 +20,16 @@ struct Tablero* tablero_crear(int ancho, int alto) {
     return new_t;
 }
 
-void tablero_imprimir(Juego *juego) {
+void tablero_imprimir(struct Juego *juego) {
     Tablero *t = juego->t;
     printf("--- NIVEL %d ---\n", juego->nivel_actual);
+    
+    printf("Armas: [1] Escopeta (%d/%d) | [2] Sniper (%d/%d) | [3] Granada (%d/%d) | [4] Especial (%d/%d)\n",
+        juego->arsenal.municion_actual[0], juego->arsenal.municion_maxima[0],
+        juego->arsenal.municion_actual[1], juego->arsenal.municion_maxima[1],
+        juego->arsenal.municion_actual[2], juego->arsenal.municion_maxima[2],
+        juego->arsenal.municion_actual[3], juego->arsenal.municion_maxima[3]);
+
     for (int y = 0; y < t->H; y++) {
         printf("%2d ", t->H - y);
         for (int x = 0; x < t->W; x++) {
@@ -33,19 +40,23 @@ void tablero_imprimir(Juego *juego) {
         printf("\n");
     }
     printf("   ");
-    for (int x = 0; x < t->W; x++) printf(" %d ", x + 1);
-    printf("\n");
+    for (int x = 0; x < t->W; x++) {
+        if (x + 1 >= 10) printf(" %d", x + 1);
+        else printf(" %d ", x + 1);
+    }
+    printf("\n\n");
 }
 
-void tablero_liberar(Tablero tablero) {
-    for (int y = 0; y < tablero.H; y++) {
-        for (int x = 0; x < tablero.W; x++) {
-            Celda *c = (Celda*)tablero.celdas[y][x];
-            if (c->pieza != NULL) 
-            free(c->pieza);
+void tablero_liberar(struct Tablero *tablero) {
+    for (int y = 0; y < tablero->H; y++) {
+        for (int x = 0; x < tablero->W; x++) {
+            Celda *c = (Celda*)tablero->celdas[y][x];
+            if (c->pieza != NULL) {
+                free(c->pieza);
+            }
             free(c);
         }
-        free(tablero.celdas[y]);
+        free(tablero->celdas[y]);
     }
-    free(tablero.celdas);
+    free(tablero->celdas);
 }

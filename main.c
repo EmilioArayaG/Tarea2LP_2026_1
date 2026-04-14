@@ -8,9 +8,10 @@ int main() {
     srand(time(NULL));
     Juego juego;
     juego.nivel_actual = 1;
+    juego.turno_enemigos = 0;
     
-    juego.t = tablero_crear(12, 12);
-    spawn_nivel(juego, juego.nivel_actual);
+    juego.t = (Tablero*)tablero_crear(12, 12);
+    spawn_nivel(&juego, juego.nivel_actual);
 
     juego.arsenal.disparar[0] = escopeta;
     juego.arsenal.disparar[1] = francotirador;
@@ -19,6 +20,12 @@ int main() {
 
     juego.arsenal.municion_maxima[0] = 2;
     juego.arsenal.municion_actual[0] = 2; 
+    juego.arsenal.municion_maxima[1] = 1;
+    juego.arsenal.municion_actual[1] = 1;
+    juego.arsenal.municion_maxima[2] = 2;
+    juego.arsenal.municion_actual[2] = 2;
+    juego.arsenal.municion_maxima[3] = 3;
+    juego.arsenal.municion_actual[3] = 3;
 
     bool jugando = true;
     char input; 
@@ -54,9 +61,9 @@ int main() {
                     default: 
                         continue;
                 }
-                juego.arsenal.disparar[in_arma](juego, direc_x, direc_y);
+                juego.arsenal.disparar[in_arma](&juego, direc_x, direc_y);
                 juego.arsenal.municion_actual[in_arma]--;
-                mover_enemigos(juego);
+                mover_enemigos(&juego);
                 continue;
             } else {
                 continue;
@@ -78,18 +85,7 @@ int main() {
                 continue;
         }
         
-        Pieza *rey = NULL;
-        for(int y = 0; y < juego.t->H; y++) {
-            for(int x = 0; x < juego.t->W; x++) {
-                Celda *c = (Celda*)juego.t->celdas[y][x];
-                if(c->pieza != NULL && c->pieza->tipo == 'R') { 
-                    rey = c->pieza; 
-                    break; 
-                }
-            }
-            if(rey != NULL) break;
-        }
-
+        Pieza *rey = juego.jugador;
         if (rey != NULL) {
             int new_x = rey->x + dir_x;
             int new_y = rey->y + dir_y;
@@ -108,14 +104,12 @@ int main() {
                         juego.arsenal.municion_actual[0]++;
                     }
                     
-                    mover_enemigos(juego);
+                    mover_enemigos(&juego);
                 }
             }
         }
     }
 
-    tablero_liberar(*(juego.t));
-    free(juego.t);
-
+    tablero_liberar(juego.t);
     return 0;
 }
