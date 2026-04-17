@@ -3,33 +3,12 @@
 #include "piezas.h"
 
 static void invocar_pieza(struct Juego *juego, char tipo, int hp, int fila_y) {
-    int r_x = 0;
-    int intentos = 0;
-    int max_intentos = juego->t->W * 10;
-    bool encontrada = false;
-    
-    while (intentos < max_intentos && !encontrada) {
+    int r_x;
+    while (true) {
         r_x = rand() % juego->t->W;
         Celda *c_t = (Celda*)juego->t->celdas[fila_y][r_x];
         if (c_t->pieza == NULL) {
-            encontrada = true;
             break;
-        }
-        intentos++;
-    }
-    
-    if (!encontrada) {
-        for(int y = fila_y + 1; y < juego->t->H; y++) {
-            for(int x = 0; x < juego->t->W; x++) {
-                Celda *c_t = (Celda*)juego->t->celdas[y][x];
-                if (c_t->pieza == NULL) {
-                    r_x = x;
-                    fila_y = y;
-                    encontrada = true;
-                    break;
-                }
-            }
-            if (encontrada) break;
         }
     }
     
@@ -74,29 +53,32 @@ static void mover_peon(struct Juego *juego, Pieza *p) {
 static void mover_caballo(struct Juego *juego, Pieza *p) {
     Pieza *rey = juego->jugador;
     Tablero *t = juego->t;
-    int s_x[8] = {1,2,2,1,-1,-2,-2,-1};
-    int s_y[8] = {-2,-1,1,2,2,1,-1,-2};
     int mejor_x = p->x;
     int mejor_y = p->y;
     int dis_min = 9999;
 
-    for(int i = 0; i<8; i++){
-        int nx = p->x + s_x[i];
-        int ny = p->y + s_y[i];
+    for (int dy = -2; dy <= 2; dy++) {
+        for (int dx = -2; dx <= 2; dx++) {
+            if (abs(dx) + abs(dy) == 3) { 
+                int nx = p->x + dx;
+                int ny = p->y + dy;
 
-        if(nx >= 0 && nx < t->W && ny >= 0 && ny < t->H){
-            Celda *c_d = (Celda*)t->celdas[ny][nx];
-            if (c_d->pieza == NULL || c_d->pieza->tipo == 'R'){
-                int dis = abs(rey->x - nx) + abs(rey->y - ny);
-                if (dis < dis_min){
-                    dis_min = dis;
-                    mejor_x = nx;
-                    mejor_y = ny;
+                if (nx >= 0 && nx < t->W && ny >= 0 && ny < t->H) {
+                    Celda *c_d = (Celda*)t->celdas[ny][nx];
+                    if (c_d->pieza == NULL || c_d->pieza->tipo == 'R') {
+                        int dis = abs(rey->x - nx) + abs(rey->y - ny);
+                        if (dis < dis_min) {
+                            dis_min = dis;
+                            mejor_x = nx;
+                            mejor_y = ny;
+                        }
+                    }
                 }
             }
         }
     }
-    if (mejor_x != p->x || mejor_y != p->y){
+
+    if (mejor_x != p->x || mejor_y != p->y) {
         Celda *c = (Celda*)t->celdas[p->y][p->x];
         Celda *c_df = (Celda*)t->celdas[mejor_y][mejor_x];
         c->pieza = NULL;
@@ -110,39 +92,42 @@ static void mover_caballo(struct Juego *juego, Pieza *p) {
 static void mover_alfil(struct Juego *juego, Pieza *p) {
     Pieza *rey = juego->jugador;
     Tablero *t = juego->t;
-    int d_x[4] = {1,1,-1,-1};
-    int d_y[4] = {1,-1,1,-1};
     int m_x = p->x;
     int m_y = p->y;
     int dis_m = 9999;
 
-    for (int i = 0; i< 4; i++){
-        for (int ps = 1; ps <= 3; ps++){
-            int nx = p->x + (d_x[i]*ps);
-            int ny = p->y + (d_y[i]*ps);
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            if (abs(dx) == 1 && abs(dy) == 1) { 
+                for (int ps = 1; ps <= 3; ps++) {
+                    int nx = p->x + (dx * ps);
+                    int ny = p->y + (dy * ps);
 
-            if (nx >= 0 && nx < t->W && ny >= 0 && ny < t->H){
-                Celda *c_d = (Celda*)t->celdas[ny][nx];
+                    if (nx >= 0 && nx < t->W && ny >= 0 && ny < t->H) {
+                        Celda *c_d = (Celda*)t->celdas[ny][nx];
 
-                if (c_d->pieza != NULL && c_d->pieza->tipo != 'R'){
-                    break;
-                }
-                int dis = abs(rey->x - nx) + abs(rey->y - ny);
+                        if (c_d->pieza != NULL && c_d->pieza->tipo != 'R') {
+                            break;
+                        }
+                        int dis = abs(rey->x - nx) + abs(rey->y - ny);
 
-                if (dis < dis_m){
-                    dis_m = dis;
-                    m_x = nx;
-                    m_y = ny;
+                        if (dis < dis_m) {
+                            dis_m = dis;
+                            m_x = nx;
+                            m_y = ny;
+                        }
+                        if (c_d->pieza != NULL && c_d->pieza->tipo == 'R') {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
                 }
-                if (c_d->pieza != NULL && c_d->pieza->tipo == 'R'){
-                    break;
-                }
-            } else {
-                break;
             }
         }
     }
-    if (m_x != p->x || m_y != p->y){
+
+    if (m_x != p->x || m_y != p->y) {
         Celda *c = (Celda*)t->celdas[p->y][p->x];
         Celda *c_df = (Celda*)t->celdas[m_y][m_x];
         c->pieza = NULL;
@@ -157,39 +142,42 @@ static void mover_torre(struct Juego *juego, Pieza *p) {
     if (juego->turno_enemigos % 2 != 0) return;
     Pieza *rey = juego->jugador;
     Tablero *t = juego->t;
-    int d_x[4] = {0,0,-1,1};
-    int d_y[4] = {1,-1,0,0};
     int m_x = p->x;
     int m_y = p->y;
     int dis_m = 9999;
 
-    for (int i = 0; i< 4; i++){
-        for (int ps = 1; ps <= 3; ps++){
-            int nx = p->x + (d_x[i]*ps);
-            int ny = p->y + (d_y[i]*ps);
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            if ((dx == 0 || dy == 0) && !(dx == 0 && dy == 0)) { 
+                for (int ps = 1; ps <= 3; ps++) {
+                    int nx = p->x + (dx * ps);
+                    int ny = p->y + (dy * ps);
 
-            if (nx >= 0 && nx < t->W && ny >= 0 && ny < t->H){
-                Celda *c_d = (Celda*)t->celdas[ny][nx];
+                    if (nx >= 0 && nx < t->W && ny >= 0 && ny < t->H) {
+                        Celda *c_d = (Celda*)t->celdas[ny][nx];
 
-                if (c_d->pieza != NULL && c_d->pieza->tipo != 'R'){
-                    break;
-                }
-                int dis = abs(rey->x - nx) + abs(rey->y - ny);
+                        if (c_d->pieza != NULL && c_d->pieza->tipo != 'R') {
+                            break;
+                        }
+                        int dis = abs(rey->x - nx) + abs(rey->y - ny);
 
-                if (dis < dis_m){
-                    dis_m = dis;
-                    m_x = nx;
-                    m_y = ny;
+                        if (dis < dis_m) {
+                            dis_m = dis;
+                            m_x = nx;
+                            m_y = ny;
+                        }
+                        if (c_d->pieza != NULL && c_d->pieza->tipo == 'R') {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
                 }
-                if (c_d->pieza != NULL && c_d->pieza->tipo == 'R'){
-                    break;
-                }
-            } else {
-                break;
             }
         }
     }
-    if (m_x != p->x || m_y != p->y){
+
+    if (m_x != p->x || m_y != p->y) {
         Celda *c = (Celda*)t->celdas[p->y][p->x];
         Celda *c_df = (Celda*)t->celdas[m_y][m_x];
         c->pieza = NULL;
@@ -203,39 +191,42 @@ static void mover_torre(struct Juego *juego, Pieza *p) {
 static void mover_reina(struct Juego *juego, Pieza *p) {
     Pieza *rey = juego->jugador;
     Tablero *t = juego->t;
-    int d_x[8] = {0,0,-1,1,1,1,-1,-1};
-    int d_y[8] = {1, -1, 0, 0, 1, -1, 1, -1};
     int m_x = p->x;
     int m_y = p->y;
     int dist_m = 9999;
 
-    for (int i = 0; i< 8; i++){
-        for (int ps = 1; ps <= 4; ps++){
-            int nx = p->x + (d_x[i]*ps);
-            int ny = p->y + (d_y[i]*ps);
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            if (dx == 0 && dy == 0) continue; 
+            
+            for (int ps = 1; ps <= 4; ps++) {
+                int nx = p->x + (dx * ps);
+                int ny = p->y + (dy * ps);
 
-            if (nx >= 0 && nx < t->W && ny >= 0 && ny < t->H){
-                Celda *c_d = (Celda*)t->celdas[ny][nx];
+                if (nx >= 0 && nx < t->W && ny >= 0 && ny < t->H) {
+                    Celda *c_d = (Celda*)t->celdas[ny][nx];
 
-                if (c_d->pieza != NULL && c_d->pieza->tipo != 'R'){
+                    if (c_d->pieza != NULL && c_d->pieza->tipo != 'R') {
+                        break;
+                    }
+                    int dis = abs(rey->x - nx) + abs(rey->y - ny);
+
+                    if (dis < dist_m) {
+                        dist_m = dis;
+                        m_x = nx;
+                        m_y = ny;
+                    }
+                    if (c_d->pieza != NULL && c_d->pieza->tipo == 'R') {
+                        break;
+                    }
+                } else {
                     break;
                 }
-                int dis = abs(rey->x - nx) + abs(rey->y - ny);
-
-                if (dis < dist_m){
-                    dist_m = dis;
-                    m_x = nx;
-                    m_y = ny;
-                }
-                if (c_d->pieza != NULL && c_d->pieza->tipo == 'R'){
-                    break;
-                }
-            } else {
-                break;
             }
         }
     }
-    if (m_x != p->x || m_y != p->y){
+
+    if (m_x != p->x || m_y != p->y) {
         Celda *c = (Celda*)t->celdas[p->y][p->x];
         Celda *c_df = (Celda*)t->celdas[m_y][m_x];
         c->pieza = NULL;
