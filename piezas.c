@@ -3,12 +3,36 @@
 #include "piezas.h"
 
 static void invocar_pieza(struct Juego *juego, char tipo, int hp, int fila_y) {
-    int r_x;
-    while (true) {
+    int r_x = 0;
+    int intentos = 0;
+    int max_intentos = juego->t->W * 10;
+    bool encontrada = false;
+    
+    while (intentos < max_intentos && !encontrada) {
         r_x = rand() % juego->t->W;
         Celda *c_t = (Celda*)juego->t->celdas[fila_y][r_x];
-        if (c_t->pieza == NULL) break;
+        if (c_t->pieza == NULL) {
+            encontrada = true;
+            break;
+        }
+        intentos++;
     }
+    
+    if (!encontrada) {
+        for(int y = fila_y + 1; y < juego->t->H; y++) {
+            for(int x = 0; x < juego->t->W; x++) {
+                Celda *c_t = (Celda*)juego->t->celdas[y][x];
+                if (c_t->pieza == NULL) {
+                    r_x = x;
+                    fila_y = y;
+                    encontrada = true;
+                    break;
+                }
+            }
+            if (encontrada) break;
+        }
+    }
+    
     Pieza *p = (Pieza*)malloc(sizeof(Pieza));
     p->tipo = tipo;
     p->hp = hp;
@@ -25,7 +49,7 @@ static void mover_peon(struct Juego *juego, Pieza *p) {
     int diff_y = rey->y - p->y;
     int nx = p->x, ny = p->y;
 
-    if (abs(diff_x) <= 1 && abs(diff_y) <= 1) {
+    if (abs(diff_x) <= 1 && abs(diff_y) <= 1 && diff_y != 0) {
         nx = rey->x;
         ny = rey->y;
     } else {
@@ -294,9 +318,9 @@ bool verificar_estado_rey(struct Juego *juego) {
         for(int x = 0; x < juego->t->W; x++){
             Celda *c = (Celda*)juego->t->celdas[y][x];
             if (c->pieza != NULL && c->pieza->tipo == 'R'){
-                return true;
+                return false;
             }
         }
     }
-    return false;
+    return true;
 }

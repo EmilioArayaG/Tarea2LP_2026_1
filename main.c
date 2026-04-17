@@ -110,7 +110,16 @@ int main() {
 
         if (turno_valido){
             mover_enemigos(&juego);
-            if(verificar_estado_rey(&juego)){
+            
+            bool rey_capturado = false;
+            if(juego.jugador) {
+                Celda *celda_rey = (Celda*)juego.t->celdas[juego.jugador->y][juego.jugador->x];
+                if(celda_rey->pieza != juego.jugador) {
+                    rey_capturado = true;
+                }
+            }
+            
+            if(verificar_estado_rey(&juego) || rey_capturado){
                 system("clear");
                 tablero_imprimir(&juego);
                 printf("\nEl rey ha caido...\n");
