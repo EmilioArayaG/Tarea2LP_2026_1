@@ -19,13 +19,12 @@ int main() {
     juego.arsenal.disparar[3] = especial;
 
     juego.arsenal.municion_maxima[0] = 2;
-    juego.arsenal.municion_actual[0] = 2; 
     juego.arsenal.municion_maxima[1] = 1;
-    juego.arsenal.municion_actual[1] = 1;
     juego.arsenal.municion_maxima[2] = 2;
-    juego.arsenal.municion_actual[2] = 2;
     juego.arsenal.municion_maxima[3] = 3;
-    juego.arsenal.municion_actual[3] = 3;
+    for (int i = 0; i < 4; i++){
+        juego.arsenal.municion_actual[i] = juego.arsenal.municion_maxima[i];
+    }
 
     bool jugando = true;
     char input; 
@@ -40,7 +39,9 @@ int main() {
             jugando = false;
             break;
         }
-        
+        int dir_x = 0, dir_y = 0;
+        bool turno_valido = false;
+
         if (input >= '1' && input <= '4'){
             int in_arma = input - '1';
             if (juego.arsenal.municion_actual[in_arma] > 0){
@@ -63,8 +64,7 @@ int main() {
                 }
                 juego.arsenal.disparar[in_arma](&juego, direc_x, direc_y);
                 juego.arsenal.municion_actual[in_arma]--;
-                mover_enemigos(&juego);
-                continue;
+                turno_valido = true;
             } else {
                 continue;
             }
@@ -87,24 +87,42 @@ int main() {
         
         Pieza *rey = juego.jugador;
         if (rey != NULL) {
-            int new_x = rey->x + dir_x;
-            int new_y = rey->y + dir_y;
+            int n_x = rey->x + dir_x;
+            int n_y = rey->y + dir_y;
             
-            if (new_x >= 0 && new_x < juego.t->W && new_y >= 0 && new_y < juego.t->H){
+            if (n_x >= 0 && n_x < juego.t->W && n_y >= 0 && n_y < juego.t->H){
                 Celda *celda_vieja = (Celda*)juego.t->celdas[rey->y][rey->x];
-                Celda *celda_nueva = (Celda*)juego.t->celdas[new_y][new_x];
+                Celda *celda_nueva = (Celda*)juego.t->celdas[n_y][n_x];
                 
                 if (celda_nueva->pieza == NULL) {
                     celda_vieja->pieza = NULL;
-                    rey->x = new_x;
-                    rey->y = new_y;
+                    rey->x = n_x;
+                    rey->y = n_y;
                     celda_nueva->pieza = rey;
+                    turno_valido = true;
                     
                     if (juego.arsenal.municion_actual[0] < juego.arsenal.municion_maxima[0]) {
                         juego.arsenal.municion_actual[0]++;
                     }
                     
-                    mover_enemigos(&juego);
+                }
+            }
+        }
+        if (turno_valido){
+            mover_enemigos(&juego);
+            if(verificar_estado_rey(&juego)){
+                system("clear");
+                tablero_imprimir(&juego);
+                printf("\nEl rey ha caido...\n");
+                printf("--- Fin Del Juego! ---\n");
+                jugando = false;
+                continue;
+            }
+
+            int enem_vivos = 0;
+            for(int y = 0; y < juego.t->H; y++){
+                for(int x = 0; x < juego.t->W; x++){
+                    
                 }
             }
         }
