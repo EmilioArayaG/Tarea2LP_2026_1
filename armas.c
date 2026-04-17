@@ -17,9 +17,27 @@ bool escopeta(struct Juego *j, int dx, int dy) {
                 free(c->pieza); 
                 c->pieza = NULL; 
             }
-            return true;
         }
     }
+
+    int bx = j->jugador->x + (dx * 2);
+    int by = j->jugador->y + (dy * 2);
+    
+    for (int y = by - 1; y <= by + 1; y++) {
+        for (int x = bx - 1; x <= bx + 1; x++) {
+            if(x >= 0 && x < j->t->W && y >= 0 && y < j->t->H) {
+                Celda *c_back = (Celda*)j->t->celdas[y][x];
+                if(c_back->pieza && c_back->pieza->tipo != 'R') {
+                    c_back->pieza->hp -= 1;
+                    if(c_back->pieza->hp <= 0) { 
+                        free(c_back->pieza); 
+                        c_back->pieza = NULL; 
+                    }
+                }
+            }
+        }
+    }
+    
     return true;
 }
 

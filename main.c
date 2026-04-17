@@ -39,6 +39,7 @@ int main() {
             jugando = false;
             break;
         }
+
         int dir_x = 0;
         int dir_y = 0;
         bool turno_valido = false;
@@ -69,44 +70,44 @@ int main() {
             } else {
                 continue;
             }
-        }
-        
-        switch(input){
-            case 'W': case 'w': dir_y = -1; break;
-            case 'A': case 'a': dir_x = -1; break;
-            case 'S': case 's': dir_y = 1; break;
-            case 'D': case 'd': dir_x = 1; break;
-            case 'Q': case 'q': dir_x = -1; dir_y = -1; break;
-            case 'E': case 'e': dir_x = 1; dir_y = -1; break;
-            case 'Z': case 'z': dir_x = -1; dir_y = 1; break;
-            case 'C': case 'c': dir_x = 1; dir_y = 1; break;
-            default: 
-                continue;
-        }
-        
-        Pieza *rey = juego.jugador;
-        if (rey != NULL) {
-            int n_x = rey->x + dir_x;
-            int n_y = rey->y + dir_y;
+        } else {
+            switch(input){
+                case 'W': case 'w': dir_y = -1; break;
+                case 'A': case 'a': dir_x = -1; break;
+                case 'S': case 's': dir_y = 1; break;
+                case 'D': case 'd': dir_x = 1; break;
+                case 'Q': case 'q': dir_x = -1; dir_y = -1; break;
+                case 'E': case 'e': dir_x = 1; dir_y = -1; break;
+                case 'Z': case 'z': dir_x = -1; dir_y = 1; break;
+                case 'C': case 'c': dir_x = 1; dir_y = 1; break;
+                default: 
+                    continue;
+            }
             
-            if (n_x >= 0 && n_x < juego.t->W && n_y >= 0 && n_y < juego.t->H){
-                Celda *celda_vieja = (Celda*)juego.t->celdas[rey->y][rey->x];
-                Celda *celda_nueva = (Celda*)juego.t->celdas[n_y][n_x];
+            Pieza *rey = juego.jugador;
+            if (rey != NULL) {
+                int n_x = rey->x + dir_x;
+                int n_y = rey->y + dir_y;
                 
-                if (celda_nueva->pieza == NULL) {
-                    celda_vieja->pieza = NULL;
-                    rey->x = n_x;
-                    rey->y = n_y;
-                    celda_nueva->pieza = rey;
-                    turno_valido = true;
+                if (n_x >= 0 && n_x < juego.t->W && n_y >= 0 && n_y < juego.t->H){
+                    Celda *celda_vieja = (Celda*)juego.t->celdas[rey->y][rey->x];
+                    Celda *celda_nueva = (Celda*)juego.t->celdas[n_y][n_x];
                     
-                    if (juego.arsenal.municion_actual[0] < juego.arsenal.municion_maxima[0]) {
-                        juego.arsenal.municion_actual[0]++;
+                    if (celda_nueva->pieza == NULL) {
+                        celda_vieja->pieza = NULL;
+                        rey->x = n_x;
+                        rey->y = n_y;
+                        celda_nueva->pieza = rey;
+                        turno_valido = true;
+                        
+                        if (juego.arsenal.municion_actual[0] < juego.arsenal.municion_maxima[0]) {
+                            juego.arsenal.municion_actual[0]++;
+                        }
                     }
-                    
                 }
             }
         }
+
         if (turno_valido){
             mover_enemigos(&juego);
             if(verificar_estado_rey(&juego)){
@@ -155,7 +156,6 @@ int main() {
             }
         }
     }
-
     tablero_liberar(juego.t);
     return 0;
 }
