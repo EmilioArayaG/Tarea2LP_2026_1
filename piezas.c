@@ -137,13 +137,22 @@ void mover_enemigos(struct Juego *juego) {
             Celda *c = (Celda*)t->celdas[y][x];
             Pieza *p = c->pieza;
             if(p && p->tipo == 'P' && !p->desplz) {
-                int dx = (rey->x > p->x) ? 1 : (rey->x < p->x ? -1 : 0);
-                int dy = (rey->y > p->y) ? 1 : (rey->y < p->y ? -1 : 0);
-                if(abs(rey->x - p->x) > abs(rey->y - p->y)) dy = 0; else dx = 0;
+                int diff_x = rey->x - p->x;
+                int diff_y = rey->y - p->y;
+                int nx = p->x, ny = p->y;
+
+                if (abs(diff_x) <= 1 && abs(diff_y) <= 1) {
+                    nx = rey->x;
+                    ny = rey->y;
+                } else {
+                    if (abs(diff_x) > abs(diff_y)) {
+                        nx += (diff_x > 0) ? 1 : -1;
+                    } else {
+                        ny += (diff_y > 0) ? 1 : -1;
+                    }
+                }
                 
-                int nx = p->x + dx, ny = p->y + dy;
                 Celda *dest = (Celda*)t->celdas[ny][nx];
-                
                 if(!dest->pieza || dest->pieza->tipo == 'R') {
                     c->pieza = NULL;
                     p->x = nx; p->y = ny; p->desplz = true;
