@@ -116,7 +116,12 @@ int main() {
                 printf("\nEl rey ha caido...\n");
                 printf("--- Fin Del Juego! ---\n");
                 jugando = false;
+                
+                Celda *celda_rey = (Celda*)juego.t->celdas[juego.jugador->y][juego.jugador->x];
+                celda_rey->pieza = NULL;
                 free(juego.jugador);
+                juego.jugador = NULL;
+                
                 continue;
             }
 
@@ -151,11 +156,11 @@ int main() {
                     printf("\nNivel Completado! Presiona ENTER par continual al nivel:%d \n", juego.nivel_actual);
                     int ch;
                     while ((ch = getchar()) != '\n' && ch != EOF);
-                    getchar();
                 }
             }
         }
     }
+
     tablero_liberar(juego.t);
     return 0;
 }

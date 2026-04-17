@@ -26,7 +26,7 @@ void spawn_nivel(struct Juego *juego, int nivel) {
             cant_p = 4; cant_c = 2; cant_t = 2;
             break;
         case 3:
-            cant_p = 2; cant_c = 1; cant_a = 1; cant_q = 1;
+            cant_p = 2; cant_t = 1; cant_a = 1; cant_q = 1;
             break;
     }
     for (int i = 0; i < cant_p; i++){
