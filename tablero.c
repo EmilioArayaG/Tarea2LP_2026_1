@@ -47,16 +47,18 @@ void tablero_imprimir(struct Juego *juego) {
     printf("\n\n");
 }
 
-void tablero_liberar(struct Tablero *tablero) {
-    for (int y = 0; y < tablero->H; y++) {
-        for (int x = 0; x < tablero->W; x++) {
-            Celda *c = (Celda*)tablero->celdas[y][x];
+void tablero_liberar(Tablero *t) {
+    for (int y = 0; y < t->H; y++) {
+        for (int x = 0; x < t->W; x++) {
+            Celda *c = (Celda*)t->celdas[y][x];
             if (c->pieza != NULL) {
                 free(c->pieza);
+                c->pieza = NULL;
             }
             free(c);
         }
-        free(tablero->celdas[y]);
+        free(t->celdas[y]);
     }
-    free(tablero->celdas);
+    free(t->celdas);
+    free(t);
 }

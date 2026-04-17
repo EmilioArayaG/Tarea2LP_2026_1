@@ -39,7 +39,8 @@ int main() {
             jugando = false;
             break;
         }
-        int dir_x = 0, dir_y = 0;
+        int dir_x = 0;
+        int dir_y = 0;
         bool turno_valido = false;
 
         if (input >= '1' && input <= '4'){
@@ -70,8 +71,6 @@ int main() {
             }
         }
         
-        int dir_x = 0, dir_y = 0;
-
         switch(input){
             case 'W': case 'w': dir_y = -1; break;
             case 'A': case 'a': dir_x = -1; break;
@@ -116,13 +115,42 @@ int main() {
                 printf("\nEl rey ha caido...\n");
                 printf("--- Fin Del Juego! ---\n");
                 jugando = false;
+                free(juego.jugador);
                 continue;
             }
 
             int enem_vivos = 0;
             for(int y = 0; y < juego.t->H; y++){
                 for(int x = 0; x < juego.t->W; x++){
-                    
+                    Celda *c_check = (Celda*)juego.t->celdas[y][x];
+                    if(c_check->pieza != NULL && c_check->pieza->tipo != 'R'){
+                        enem_vivos++;
+                    }
+                }
+            }
+            if (enem_vivos == 0){
+                if (juego.nivel_actual == 3){
+                    system("clear");
+                    tablero_imprimir(&juego);
+                    printf("\n¡Victoria! Has completado todos los niveles.\n");
+                    printf("---Ganaste---\n");
+                    jugando = false;
+                } else {
+                    juego.nivel_actual++;
+                    tablero_liberar(juego.t);
+                    if (juego.nivel_actual == 2){
+                        juego.t = (Tablero*)tablero_crear(8,8);
+                    } else if (juego.nivel_actual == 3){
+                        juego.t = (Tablero*)tablero_crear(6,6);
+                    }
+                    spawn_nivel(&juego, juego.nivel_actual);
+                    for(int i = 0; i < 4 ; i++){
+                        juego.arsenal.municion_actual[i] = juego.arsenal.municion_maxima[i];
+                    }
+                    printf("\nNivel Completado! Presiona ENTER par continual al nivel:%d \n", juego.nivel_actual);
+                    int ch;
+                    while ((ch = getchar()) != '\n' && ch != EOF);
+                    getchar();
                 }
             }
         }
