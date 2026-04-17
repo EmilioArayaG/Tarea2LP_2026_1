@@ -117,8 +117,6 @@ int main() {
                 printf("--- Fin Del Juego! ---\n");
                 jugando = false;
                 
-                Celda *celda_rey = (Celda*)juego.t->celdas[juego.jugador->y][juego.jugador->x];
-                celda_rey->pieza = NULL;
                 free(juego.jugador);
                 juego.jugador = NULL;
                 

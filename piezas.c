@@ -2,6 +2,226 @@
 #include "main.h"
 #include "piezas.h"
 
+static void invocar_pieza(struct Juego *juego, char tipo, int hp, int fila_y) {
+    int r_x;
+    while (true) {
+        r_x = rand() % juego->t->W;
+        Celda *c_t = (Celda*)juego->t->celdas[fila_y][r_x];
+        if (c_t->pieza == NULL) break;
+    }
+    Pieza *p = (Pieza*)malloc(sizeof(Pieza));
+    p->tipo = tipo;
+    p->hp = hp;
+    p->x = r_x;
+    p->y = fila_y;
+    p->desplz = false;
+    ((Celda*)juego->t->celdas[fila_y][r_x])->pieza = p;
+}
+
+static void mover_peon(struct Juego *juego, Pieza *p) {
+    Pieza *rey = juego->jugador;
+    Tablero *t = juego->t;
+    int diff_x = rey->x - p->x;
+    int diff_y = rey->y - p->y;
+    int nx = p->x, ny = p->y;
+
+    if (abs(diff_x) <= 1 && abs(diff_y) <= 1) {
+        nx = rey->x;
+        ny = rey->y;
+    } else {
+        if (abs(diff_x) > abs(diff_y)) {
+            nx += (diff_x > 0) ? 1 : -1;
+        } else {
+            ny += (diff_y > 0) ? 1 : -1;
+        }
+    }
+    
+    Celda *dest = (Celda*)t->celdas[ny][nx];
+    if(!dest->pieza || dest->pieza->tipo == 'R') {
+        Celda *c = (Celda*)t->celdas[p->y][p->x];
+        c->pieza = NULL;
+        p->x = nx; 
+        p->y = ny; 
+        p->desplz = true;
+        dest->pieza = p;
+    }
+}
+
+static void mover_caballo(struct Juego *juego, Pieza *p) {
+    Pieza *rey = juego->jugador;
+    Tablero *t = juego->t;
+    int s_x[8] = {1,2,2,1,-1,-2,-2,-1};
+    int s_y[8] = {-2,-1,1,2,2,1,-1,-2};
+    int mejor_x = p->x;
+    int mejor_y = p->y;
+    int dis_min = 9999;
+
+    for(int i = 0; i<8; i++){
+        int nx = p->x + s_x[i];
+        int ny = p->y + s_y[i];
+
+        if(nx >= 0 && nx < t->W && ny >= 0 && ny < t->H){
+            Celda *c_d = (Celda*)t->celdas[ny][nx];
+            if (c_d->pieza == NULL || c_d->pieza->tipo == 'R'){
+                int dis = abs(rey->x - nx) + abs(rey->y - ny);
+                if (dis < dis_min){
+                    dis_min = dis;
+                    mejor_x = nx;
+                    mejor_y = ny;
+                }
+            }
+        }
+    }
+    if (mejor_x != p->x || mejor_y != p->y){
+        Celda *c = (Celda*)t->celdas[p->y][p->x];
+        Celda *c_df = (Celda*)t->celdas[mejor_y][mejor_x];
+        c->pieza = NULL;
+        p->x = mejor_x;
+        p->y = mejor_y;
+        p->desplz = true;
+        c_df->pieza = p;
+    }
+}
+
+static void mover_alfil(struct Juego *juego, Pieza *p) {
+    Pieza *rey = juego->jugador;
+    Tablero *t = juego->t;
+    int d_x[4] = {1,1,-1,-1};
+    int d_y[4] = {1,-1,1,-1};
+    int m_x = p->x;
+    int m_y = p->y;
+    int dis_m = 9999;
+
+    for (int i = 0; i< 4; i++){
+        for (int ps = 1; ps <= 3; ps++){
+            int nx = p->x + (d_x[i]*ps);
+            int ny = p->y + (d_y[i]*ps);
+
+            if (nx >= 0 && nx < t->W && ny >= 0 && ny < t->H){
+                Celda *c_d = (Celda*)t->celdas[ny][nx];
+
+                if (c_d->pieza != NULL && c_d->pieza->tipo != 'R'){
+                    break;
+                }
+                int dis = abs(rey->x - nx) + abs(rey->y - ny);
+
+                if (dis < dis_m){
+                    dis_m = dis;
+                    m_x = nx;
+                    m_y = ny;
+                }
+                if (c_d->pieza != NULL && c_d->pieza->tipo == 'R'){
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+    if (m_x != p->x || m_y != p->y){
+        Celda *c = (Celda*)t->celdas[p->y][p->x];
+        Celda *c_df = (Celda*)t->celdas[m_y][m_x];
+        c->pieza = NULL;
+        p->x = m_x;
+        p->y = m_y;
+        p->desplz = true;
+        c_df->pieza = p;
+    }
+}
+
+static void mover_torre(struct Juego *juego, Pieza *p) {
+    if (juego->turno_enemigos % 2 != 0) return;
+    Pieza *rey = juego->jugador;
+    Tablero *t = juego->t;
+    int d_x[4] = {0,0,-1,1};
+    int d_y[4] = {1,-1,0,0};
+    int m_x = p->x;
+    int m_y = p->y;
+    int dis_m = 9999;
+
+    for (int i = 0; i< 4; i++){
+        for (int ps = 1; ps <= 3; ps++){
+            int nx = p->x + (d_x[i]*ps);
+            int ny = p->y + (d_y[i]*ps);
+
+            if (nx >= 0 && nx < t->W && ny >= 0 && ny < t->H){
+                Celda *c_d = (Celda*)t->celdas[ny][nx];
+
+                if (c_d->pieza != NULL && c_d->pieza->tipo != 'R'){
+                    break;
+                }
+                int dis = abs(rey->x - nx) + abs(rey->y - ny);
+
+                if (dis < dis_m){
+                    dis_m = dis;
+                    m_x = nx;
+                    m_y = ny;
+                }
+                if (c_d->pieza != NULL && c_d->pieza->tipo == 'R'){
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+    if (m_x != p->x || m_y != p->y){
+        Celda *c = (Celda*)t->celdas[p->y][p->x];
+        Celda *c_df = (Celda*)t->celdas[m_y][m_x];
+        c->pieza = NULL;
+        p->x = m_x;
+        p->y = m_y;
+        p->desplz = true;
+        c_df->pieza = p;
+    }
+}
+
+static void mover_reina(struct Juego *juego, Pieza *p) {
+    Pieza *rey = juego->jugador;
+    Tablero *t = juego->t;
+    int d_x[8] = {0,0,-1,1,1,1,-1,-1};
+    int d_y[8] = {1, -1, 0, 0, 1, -1, 1, -1};
+    int m_x = p->x;
+    int m_y = p->y;
+    int dist_m = 9999;
+
+    for (int i = 0; i< 8; i++){
+        for (int ps = 1; ps <= 4; ps++){
+            int nx = p->x + (d_x[i]*ps);
+            int ny = p->y + (d_y[i]*ps);
+
+            if (nx >= 0 && nx < t->W && ny >= 0 && ny < t->H){
+                Celda *c_d = (Celda*)t->celdas[ny][nx];
+
+                if (c_d->pieza != NULL && c_d->pieza->tipo != 'R'){
+                    break;
+                }
+                int dis = abs(rey->x - nx) + abs(rey->y - ny);
+
+                if (dis < dist_m){
+                    dist_m = dis;
+                    m_x = nx;
+                    m_y = ny;
+                }
+                if (c_d->pieza != NULL && c_d->pieza->tipo == 'R'){
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+    if (m_x != p->x || m_y != p->y){
+        Celda *c = (Celda*)t->celdas[p->y][p->x];
+        Celda *c_df = (Celda*)t->celdas[m_y][m_x];
+        c->pieza = NULL;
+        p->x = m_x;
+        p->y = m_y;
+        p->desplz = true;
+        c_df->pieza = p;
+    }
+}
+
 void spawn_nivel(struct Juego *juego, int nivel) {
     int y_r = juego->t->H - 1;
     int x_r = 1 + (rand() % (juego->t->W - 2));
@@ -17,104 +237,23 @@ void spawn_nivel(struct Juego *juego, int nivel) {
     Celda *c = (Celda*)juego->t->celdas[y_r][x_r];
     c->pieza = p_rey;
 
-    int cant_p = 0, cant_c = 0, cant_a = 0, cant_t = 0, cant_q = 0;
     switch(nivel){
         case 1:
-            cant_p = 4; cant_c = 2; cant_a = 2;
+            for (int i = 0; i < 4; i++) invocar_pieza(juego, 'P', 1, 1);
+            for (int i = 0; i < 2; i++) invocar_pieza(juego, 'C', 2, 0);
+            for (int i = 0; i < 2; i++) invocar_pieza(juego, 'A', 2, 0);
             break;
         case 2:
-            cant_p = 4; cant_c = 2; cant_t = 2;
+            for (int i = 0; i < 4; i++) invocar_pieza(juego, 'P', 1, 1);
+            for (int i = 0; i < 2; i++) invocar_pieza(juego, 'C', 2, 0);
+            for (int i = 0; i < 2; i++) invocar_pieza(juego, 'T', 4, 0);
             break;
         case 3:
-            cant_p = 2; cant_t = 1; cant_a = 1; cant_q = 1;
+            for (int i = 0; i < 2; i++) invocar_pieza(juego, 'P', 1, 1);
+            for (int i = 0; i < 1; i++) invocar_pieza(juego, 'T', 4, 0);
+            for (int i = 0; i < 1; i++) invocar_pieza(juego, 'A', 2, 0);
+            for (int i = 0; i < 1; i++) invocar_pieza(juego, 'Q', 3, 0);
             break;
-    }
-    for (int i = 0; i < cant_p; i++){
-        int r_x;
-        int r_y = 1;
-        while (true){
-            r_x = rand() % juego->t->W;
-            Celda *c_t = (Celda*)juego->t->celdas[r_y][r_x];
-            if (c_t->pieza == NULL){
-                break;
-            }
-        }
-        Pieza *p = (Pieza*)malloc(sizeof(Pieza));
-        p->tipo = 'P';
-        p->hp = 1;
-        p->x = r_x;
-        p->y = r_y;
-        p->desplz = false;
-        Celda *cp = (Celda*)juego->t->celdas[r_y][r_x];
-        cp->pieza = p;
-    }
-    for (int i = 0; i < cant_c; i++){
-        int r_x;
-        int r_y = 0;
-        while (true){
-            r_x = rand() % juego->t->W;
-            Celda *c_t = (Celda*)juego->t->celdas[r_y][r_x];
-            if (c_t->pieza == NULL) break;
-        }
-        Pieza *p = (Pieza*)malloc(sizeof(Pieza));
-        p->tipo = 'C';
-        p->hp = 2;
-        p->x = r_x;
-        p->y = r_y;
-        p->desplz = false;
-        Celda *cp = (Celda*)juego->t->celdas[r_y][r_x];
-        cp->pieza = p;
-    }
-    for(int i = 0; i < cant_a; i++){
-        int r_x;
-        int r_y = 0;
-        while (true){
-            r_x = rand() % juego->t->W;
-            Celda *c_t = (Celda*)juego->t->celdas[r_y][r_x];
-            if (c_t->pieza == NULL) break;
-        }
-        Pieza *p = (Pieza*)malloc(sizeof(Pieza));
-        p->tipo = 'A';
-        p->hp = 2;
-        p->x = r_x;
-        p->y = r_y;
-        p->desplz = false;
-        Celda *cp = (Celda*)juego->t->celdas[r_y][r_x];
-        cp->pieza = p;
-    }
-    for(int i = 0; i < cant_t; i++){
-        int r_x;
-        int r_y = 0;
-        while (true){
-            r_x = rand() % juego->t->W;
-            Celda *c_t = (Celda*)juego->t->celdas[r_y][r_x];
-            if (c_t->pieza == NULL) break;
-        }
-        Pieza *p = (Pieza*)malloc(sizeof(Pieza));
-        p->tipo = 'T';
-        p->hp = 4;
-        p->x = r_x;
-        p->y = r_y;
-        p->desplz = false;
-        Celda *cp = (Celda*)juego->t->celdas[r_y][r_x];
-        cp->pieza = p;
-    }
-    for(int i = 0; i < cant_q; i++){
-        int r_x;
-        int r_y = 0;
-        while (true){
-            r_x = rand() % juego->t->W;
-            Celda *c_t = (Celda*)juego->t->celdas[r_y][r_x];
-            if (c_t->pieza == NULL) break;
-        }
-        Pieza *p = (Pieza*)malloc(sizeof(Pieza));
-        p->tipo = 'Q';
-        p->hp = 3;
-        p->x = r_x;
-        p->y = r_y;
-        p->desplz = false;
-        Celda *cp = (Celda*)juego->t->celdas[r_y][r_x];
-        cp->pieza = p;
     }
 }
 
@@ -136,182 +275,14 @@ void mover_enemigos(struct Juego *juego) {
         for(int x=0; x<t->W; x++) {
             Celda *c = (Celda*)t->celdas[y][x];
             Pieza *p = c->pieza;
-            if(p && p->tipo == 'P' && !p->desplz) {
-                int diff_x = rey->x - p->x;
-                int diff_y = rey->y - p->y;
-                int nx = p->x, ny = p->y;
-
-                if (abs(diff_x) <= 1 && abs(diff_y) <= 1) {
-                    nx = rey->x;
-                    ny = rey->y;
-                } else {
-                    if (abs(diff_x) > abs(diff_y)) {
-                        nx += (diff_x > 0) ? 1 : -1;
-                    } else {
-                        ny += (diff_y > 0) ? 1 : -1;
-                    }
-                }
-                
-                Celda *dest = (Celda*)t->celdas[ny][nx];
-                if(!dest->pieza || dest->pieza->tipo == 'R') {
-                    c->pieza = NULL;
-                    p->x = nx; p->y = ny; p->desplz = true;
-                    dest->pieza = p;
-                }
-            } else if (p && p->tipo == 'C' && !p->desplz){
-                int s_x[8] = {1,2,2,1,-1,-2,-2,-1};
-                int s_y[8] = {-2,-1,1,2,2,1,-1,-2};
-                int mejor_x = p->x;
-                int mejor_y = p->y;
-                int dis_min = 9999;
-
-                for(int i = 0; i<8; i++){
-                    int nx = p->x + s_x[i];
-                    int ny = p->y + s_y[i];
-
-                    if(nx >= 0 && nx < t->W && ny >= 0 && ny < t->H){
-                        Celda *c_d = (Celda*)t->celdas[ny][nx];
-                        if (c_d->pieza == NULL || c_d->pieza->tipo == 'R'){
-                            int dis = abs(rey->x - nx) + abs(rey->y - ny);
-                            if (dis < dis_min){
-                                dis_min = dis;
-                                mejor_x = nx;
-                                mejor_y = ny;
-                            }
-                        }
-                    }
-                }
-                if (mejor_x != p->x || mejor_y != p->y){
-                    Celda *c_df = (Celda*)t->celdas[mejor_y][mejor_x];
-                    c->pieza = NULL;
-                    p->x = mejor_x;
-                    p->y = mejor_y;
-                    p->desplz = true;
-                    c_df->pieza = p;
-                }
-            } else if (p && p->tipo == 'A' && !p->desplz){
-                int d_x[4] = {1,1,-1,-1};
-                int d_y[4] = {1,-1,1,-1};
-                int m_x = p->x;
-                int m_y = p->y;
-                int dis_m = 9999;
-
-                for (int i = 0; i< 4; i++){
-                    for (int ps = 1; ps <= 3; ps++){
-                        int nx = p->x + (d_x[i]*ps);
-                        int ny = p->y + (d_y[i]*ps);
-
-                        if (nx >= 0 && nx < t->W && ny >= 0 && ny < t->H){
-                            Celda *c_d = (Celda*)t->celdas[ny][nx];
-
-                            if (c_d->pieza != NULL && c_d->pieza->tipo != 'R'){
-                                break;
-                            }
-                            int dis = abs(rey->x - nx) + abs(rey->y - ny);
-
-                            if (dis < dis_m){
-                                dis_m = dis;
-                                m_x = nx;
-                                m_y = ny;
-                            }
-                            if (c_d->pieza != NULL && c_d->pieza->tipo == 'R'){
-                                break;
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                if (m_x != p->x || m_y != p->y){
-                    Celda *c_df = (Celda*)t->celdas[m_y][m_x];
-                    c->pieza = NULL;
-                    p->x = m_x;
-                    p->y = m_y;
-                    p->desplz = true;
-                    c_df->pieza = p;
-                }
-            } else if (p && p->tipo == 'T' && !p->desplz){
-                if( juego->turno_enemigos % 2 == 0){
-                    int d_x[4] = {0,0,-1,1};
-                    int d_y[4] = {1,-1,0,0};
-                    int m_x = p->x;
-                    int m_y = p->y;
-                    int dis_m = 9999;
-                    for (int i = 0; i< 4; i++){
-                        for (int ps = 1; ps <= 3; ps++){
-                            int nx = p->x + (d_x[i]*ps);
-                            int ny = p->y + (d_y[i]*ps);
-
-                            if (nx >= 0 && nx < t->W && ny >= 0 && ny < t->H){
-                                Celda *c_d = (Celda*)t->celdas[ny][nx];
-
-                                if (c_d->pieza != NULL && c_d->pieza->tipo != 'R'){
-                                    break;
-                                }
-                                int dis = abs(rey->x - nx) + abs(rey->y - ny);
-
-                                if (dis < dis_m){
-                                    dis_m = dis;
-                                    m_x = nx;
-                                    m_y = ny;
-                                }
-                                if (c_d->pieza != NULL && c_d->pieza->tipo == 'R'){
-                                    break;
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-                    if (m_x != p->x || m_y != p->y){
-                        Celda *c_df = (Celda*)t->celdas[m_y][m_x];
-                        c->pieza = NULL;
-                        p->x = m_x;
-                        p->y = m_y;
-                        p->desplz = true;
-                        c_df->pieza = p;
-                    }
-                } 
-            } else if (p && p->tipo == 'Q' && !p->desplz){
-                int d_x[8] = {0,0,-1,1,1,1,-1,-1};
-                int d_y[8] = {1, -1, 0, 0, 1, -1, 1, -1};
-                int m_x = p->x;
-                int m_y = p->y;
-                int dist_m = 9999;
-
-                for (int i = 0; i< 8; i++){
-                    for (int ps = 1; ps <= 4; ps++){
-                        int nx = p->x + (d_x[i]*ps);
-                        int ny = p->y + (d_y[i]*ps);
-
-                        if (nx >= 0 && nx < t->W && ny >= 0 && ny < t->H){
-                            Celda *c_d = (Celda*)t->celdas[ny][nx];
-
-                            if (c_d->pieza != NULL && c_d->pieza->tipo != 'R'){
-                                break;
-                            }
-                            int dis = abs(rey->x - nx) + abs(rey->y - ny);
-
-                            if (dis < dist_m){
-                                dist_m = dis;
-                                m_x = nx;
-                                m_y = ny;
-                            }
-                            if (c_d->pieza != NULL && c_d->pieza->tipo == 'R'){
-                                break;
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-                }
-                if (m_x != p->x || m_y != p->y){
-                    Celda *c_df = (Celda*)t->celdas[m_y][m_x];
-                    c->pieza = NULL;
-                    p->x = m_x;
-                    p->y = m_y;
-                    p->desplz = true;
-                    c_df->pieza = p;
+            
+            if(p && !p->desplz) {
+                switch(p->tipo) {
+                    case 'P': mover_peon(juego, p); break;
+                    case 'C': mover_caballo(juego, p); break;
+                    case 'A': mover_alfil(juego, p); break;
+                    case 'T': mover_torre(juego, p); break;
+                    case 'Q': mover_reina(juego, p); break;
                 }
             }
         }
@@ -323,9 +294,9 @@ bool verificar_estado_rey(struct Juego *juego) {
         for(int x = 0; x < juego->t->W; x++){
             Celda *c = (Celda*)juego->t->celdas[y][x];
             if (c->pieza != NULL && c->pieza->tipo == 'R'){
-                return false;
+                return true;
             }
         }
     }
-    return true;
+    return false;
 }
