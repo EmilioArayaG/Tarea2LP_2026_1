@@ -1,7 +1,17 @@
 #include <stdlib.h>
 #include "main.h"
 #include "piezas.h"
-
+/*
+***
+Parametro 1: struct Juego *juego
+Parametro 2: char tipo
+Parametro 3: int hp
+Parametro 4: int fila_y
+***
+Retorno: void
+***
+Esta funcion recibe el estado del juego, el caracter que representa a la pieza, sus puntos de vida y la fila del tablero donde debe aparecer. Realiza una busqueda de una celda vacia de forma aleatoria en la fila especificada y asigna memoria dinamica en el heap para instanciar la nueva pieza, colocandola en el tablero.
+*/
 static void invocar_pieza(struct Juego *juego, char tipo, int hp, int fila_y) {
     int r_x;
     while (true) {
@@ -20,7 +30,15 @@ static void invocar_pieza(struct Juego *juego, char tipo, int hp, int fila_y) {
     p->desplz = false;
     ((Celda*)juego->t->celdas[fila_y][r_x])->pieza = p;
 }
-
+/*
+***
+Parametro 1: struct Juego *juego
+Parametro 2: Pieza *p
+***
+Retorno: void
+***
+Esta funcion recibe el entorno del juego y el puntero a la pieza tipo Peon que se va a mover. Calcula la diferencia de coordenadas respecto al Rey y ejecuta el avance ortogonal de una casilla hacia el objetivo, o un ataque diagonal solo si el Rey esta a una casilla de distancia.
+*/
 static void mover_peon(struct Juego *juego, Pieza *p) {
     Pieza *rey = juego->jugador;
     Tablero *t = juego->t;
@@ -49,7 +67,15 @@ static void mover_peon(struct Juego *juego, Pieza *p) {
         dest->pieza = p;
     }
 }
-
+/*
+***
+Parametro 1: struct Juego *juego
+Parametro 2: Pieza *p
+***
+Retorno: void
+***
+Esta funcion recibe el puntero al juego general y el puntero a la pieza Caballo. Evalua todas las combinaciones de salto en forma de L, buscando la casilla valida que minimice la distancia hacia el Rey, y actualiza la posicion de la pieza.
+*/
 static void mover_caballo(struct Juego *juego, Pieza *p) {
     Pieza *rey = juego->jugador;
     Tablero *t = juego->t;
@@ -88,7 +114,15 @@ static void mover_caballo(struct Juego *juego, Pieza *p) {
         c_df->pieza = p;
     }
 }
-
+/*
+***
+Parametro 1: struct Juego *juego
+Parametro 2: Pieza *p
+***
+Retorno: void
+***
+Esta funcion recibe los datos de la partida y el puntero del Alfil. Rastrea las cuatro direcciones diagonales posibles simulando un deslizamiento de hasta 3 casillas, deteniendose si encuentra un obstaculo, para mover la pieza hacia la casilla que mas se acerque al Rey.
+*/
 static void mover_alfil(struct Juego *juego, Pieza *p) {
     Pieza *rey = juego->jugador;
     Tablero *t = juego->t;
@@ -137,7 +171,15 @@ static void mover_alfil(struct Juego *juego, Pieza *p) {
         c_df->pieza = p;
     }
 }
-
+/*
+***
+Parametro 1: struct Juego *juego
+Parametro 2: Pieza *p
+***
+Retorno: void
+***
+Esta funcion recibe el estado del tablero y el puntero de la Torre. Verifica primero si el turno es par para permitir el movimiento, de ser asi, explora las lineas ortogonales hasta un maximo de 3 casillas por paso para acercarse al jugador, evitando atravesar otras piezas. 
+*/
 static void mover_torre(struct Juego *juego, Pieza *p) {
     if (juego->turno_enemigos % 2 != 0) return;
     Pieza *rey = juego->jugador;
@@ -187,7 +229,15 @@ static void mover_torre(struct Juego *juego, Pieza *p) {
         c_df->pieza = p;
     }
 }
-
+/*
+***
+Parametro 1: struct Juego *juego
+Parametro 2: Pieza *p
+***
+Retorno: void
+***
+Esta funcion recibe la estructura principal del juego y el puntero correspondiente a la Reina. Analiza las 8 direcciones posibles (diagonales y ortogonales) con un alcance de hasta 4 casillas por desplazamiento, calcula la ruta optima y despejada hacia el objetivo final.
+*/
 static void mover_reina(struct Juego *juego, Pieza *p) {
     Pieza *rey = juego->jugador;
     Tablero *t = juego->t;
@@ -236,7 +286,15 @@ static void mover_reina(struct Juego *juego, Pieza *p) {
         c_df->pieza = p;
     }
 }
-
+/*
+***
+Parametro 1: struct Juego *juego
+Parametro 2: int nivel
+***
+Retorno: void
+***
+Esta funcion recibe el puntero al juego y el nivel actual. Se encarga de instanciar al Rey en la ultima fila e invocar las cantidades especificas de cada enemigo en la primera y segunda fila dependiendo del nivel actual de la partida.
+*/
 void spawn_nivel(struct Juego *juego, int nivel) {
     int y_r = juego->t->H - 1;
     int x_r = 1 + (rand() % (juego->t->W - 2));
@@ -271,7 +329,14 @@ void spawn_nivel(struct Juego *juego, int nivel) {
             break;
     }
 }
-
+/*
+***
+Parametro 1: struct Juego *juego
+***
+Retorno: void
+***
+Esta funcion recibe la informacion completa de la partida. Su objetivo es reiniciar las banderas de desplazamiento de todas las piezas para el nuevo turno, y recorrer el tablero iterando sobre los enemigos vivos para derivar sus calculos de movimiento a sus respectivas funciones estaticas.
+*/
 void mover_enemigos(struct Juego *juego) {
     Tablero *t = juego->t;
     Pieza *rey = juego->jugador;
@@ -303,7 +368,14 @@ void mover_enemigos(struct Juego *juego) {
         }
     }
 }
-
+/*
+***
+Parametro 1: struct Juego *juego
+***
+Retorno: bool
+***
+Esta funcion recibe la direccion de memoria del estado del juego. Escanea el tablero actual casilla por casilla para verificar si la pieza con el caracter que representa al Rey sigue presente en la partida. Retorna false en caso de encontrar al Rey vivo, o true si el Rey ya no se encuentra en el mapa indicando una condicion de derrota.
+*/
 bool verificar_estado_rey(struct Juego *juego) {
     for(int y = 0; y < juego->t->H; y++){
         for(int x = 0; x < juego->t->W; x++){

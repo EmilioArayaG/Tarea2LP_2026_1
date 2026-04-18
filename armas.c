@@ -2,7 +2,16 @@
 #include <stdlib.h>
 #include "main.h"
 #include "armas.h"
-
+/*
+***
+Parametro 1: struct Juego *j
+Parametro 2: int dx
+Parametro 3: int dy
+***
+Retorno: bool
+***
+Esta funcion recibe el estado actual del juego y la direccion de el disparo (dx, dy), efectua el disparo a corta distancia que inflige 2 de daño al primer objetivo y 1 de daño a las 3 casillas que estan inmediatamente detras de este. Retorna true en caso de disparar con exito o false en caso de fallo
+*/
 bool escopeta(struct Juego *j, int dx, int dy) {
     if(!j->jugador) return false;
     
@@ -47,7 +56,16 @@ bool escopeta(struct Juego *j, int dx, int dy) {
     }
     return true;
 }
-
+/*
+***
+Parametro 1: struct Juego *j
+Parametro 2: int dx
+Parametro 3: int dy
+***
+Retorno: bool
+***
+Esta funcion recibe el estado actual del juego y la direccion de el disparo (dx, dy), se traza una linea recta desde el rey hasta colisionar con un enemigo o el limite de el tablero, inflingiendo 3 de daño al primer daño. Retorna true en caso de ser exitoso el disparo o false en caso de que no lo sea.
+*/
 bool francotirador(struct Juego *j, int dx, int dy) {
     if (!j->jugador) return false;
     int b_x = j->jugador->x;
@@ -68,7 +86,16 @@ bool francotirador(struct Juego *j, int dx, int dy) {
     }
     return true;
 }
-
+/*
+***
+Parametro 1: struct Juego *j
+Parametro 2: int dx
+Parametro 3: int dy
+***
+Retorno: bool
+***
+Esta funcion recibe el estado actual del juego y la direccion de el disparo (dx, dy), proyecta un ataque a 3 casillas de distancia que genera una explosion en un area de 3x3, haciendo 2 de daño a las piezas dentro de este area. Retorna true en caso de lanzamiento exitoso o false en el caso contrario.
+*/
 bool granada(struct Juego *j, int dx, int dy) {
     if (!j->jugador) return false;
     int centro_x = j->jugador->x + (dx * 3);
@@ -89,7 +116,16 @@ bool granada(struct Juego *j, int dx, int dy) {
     }
     return true;
 }
-
+/*
+***
+Parametro 1: struct Juego *j
+Parametro 2: int dx
+Parametro 3: int dy
+***
+Retorno: bool
+***
+Esta funcion recibe el estado actual del juego y la direccion de el disparo (dx, dy), Dispara un proyectil que avanza en la direccion correspondiente hasta colisionar con un limite del tablero o un enemigo, ahi explotta y crea una cruz donde inflinge 2 de daño a las piezas que esten en ese radio. retorna true si se ejecuta con exito.
+*/
 bool especial(struct Juego *j, int dx, int dy) {
     if(!j->jugador) return false;
     int b_x = j->jugador->x;

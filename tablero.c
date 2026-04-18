@@ -3,7 +3,15 @@
 #include "tablero.h"
 #include "piezas.h"
 #include "main.h"
-
+/*
+***
+Parametro 1: int ancho
+Parametro 2: int alto
+***
+Retorno: struct Tablero*
+***
+Esta funcion reserva memoria en el heap para creal el tablero con el alto y ancho correspondiente, con sus respectivas celdas vacias.
+*/
 struct Tablero* tablero_crear(int ancho, int alto) {
     struct Tablero *new_t = (struct Tablero*)malloc(sizeof(struct Tablero));
     new_t->W = ancho;
@@ -19,7 +27,14 @@ struct Tablero* tablero_crear(int ancho, int alto) {
     }
     return new_t;
 }
-
+/*
+***
+Parametro 1: Struct Juego *juego
+***
+Retorno: void
+***
+Esta funcion imprime el HUD en la consola, mostrando toda la informacion de armas, movimientos. nivel y dibujando la matriz del tablero. 
+*/
 void tablero_imprimir(struct Juego *juego) {
     Tablero *t = juego->t;
     printf("--- NIVEL %d ---\n", juego->nivel_actual);
@@ -46,7 +61,14 @@ void tablero_imprimir(struct Juego *juego) {
     }
     printf("\n\n");
 }
-
+/*
+***
+Parametro 1: tablero *t
+***
+Retorno: void
+***
+Esta funcion se encarga de liberar toda la memoria asociada al tablero, incluyendo las piezas y celdas que esten en el tablero.
+*/
 void tablero_liberar(Tablero *t) {
     for (int y = 0; y < t->H; y++) {
         for (int x = 0; x < t->W; x++) {

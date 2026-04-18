@@ -3,7 +3,14 @@
 #include <stdbool.h>
 #include <time.h>
 #include "main.h"
-
+/*
+***
+Parametros: Ninguno
+***
+Retorno: int
+***
+Esta funcion inicializa el entorno de juego, configura el primer nivel, reserva la memoria del tablero principal y carga el arsenal de armas con su municion maxima. Ejecuta el bucle infinito del programa que procesa la entrada del usuario para moverse o disparar, valida los turnos, invoca el movimiento de los enemigos, comprueba el estado vital del Rey y gestiona las condiciones de victoria, derrota o transicion entre los distintos niveles. Al finalizar la partida, libera toda la memoria dinamica asociada al tablero antes de cerrar la ejecucion retornando cero. Es decir se encarga del flujo del Juego
+*/
 int main() {
     srand(time(NULL));
     Juego juego;
