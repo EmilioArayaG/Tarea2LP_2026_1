@@ -2,6 +2,38 @@
 #include <stdlib.h>
 #include "main.h"
 #include "armas.h"
+
+/*
+***
+Parametro 1: char tipo_enemigo
+Parametro 2: int hp_actual
+Parametro 3: int daño
+***
+Retorno: void
+***
+Esta funcion reporta el impacto de un disparo mostrando el tipo de enemigo dañado, el daño infligido y los puntos de vida restantes. 
+*/
+static void reportar_impacto(char tipo_enemigo, int hp_actual, int daño) {
+    const char *nombre[] = {"Peón", "Caballo", "Alfil", "Torre", "Reina"};
+    char tipos[] = "PCATQ";
+    
+    int idx = -1;
+    for(int i = 0; i < 5; i++) {
+        if(tipos[i] == tipo_enemigo) { idx = i; break; }
+    }
+    
+    if(idx == -1) return;
+    
+    printf("\n ¡IMPACTO! ");
+    printf("Daño: %d HP | ", daño);
+    
+    if(hp_actual <= 0) {
+        printf("%s DESTRUIDO (HP = 0/%d)\n", nombre[idx], daño);
+    } else {
+        printf("%s herido (HP = %d)\n", nombre[idx], hp_actual);
+    }
+}
+
 /*
 ***
 Parametro 1: struct Juego *j
@@ -22,6 +54,7 @@ bool escopeta(struct Juego *j, int dx, int dy) {
         Celda *c = (Celda*)j->t->celdas[ty][tx];
         if(c->pieza && c->pieza->tipo != 'R') {
             c->pieza->hp -= 2;
+            reportar_impacto(c->pieza->tipo, c->pieza->hp, 2);
             if(c->pieza->hp <= 0) { 
                 free(c->pieza); 
                 c->pieza = NULL; 
@@ -47,6 +80,7 @@ bool escopeta(struct Juego *j, int dx, int dy) {
             Celda *c_back = (Celda*)j->t->celdas[cy][cx];
             if(c_back->pieza && c_back->pieza->tipo != 'R') {
                 c_back->pieza->hp -= 1;
+                reportar_impacto(c_back->pieza->tipo, c_back->pieza->hp, 1);
                 if(c_back->pieza->hp <= 0) { 
                     free(c_back->pieza); 
                     c_back->pieza = NULL; 
@@ -56,6 +90,7 @@ bool escopeta(struct Juego *j, int dx, int dy) {
     }
     return true;
 }
+
 /*
 ***
 Parametro 1: struct Juego *j
@@ -77,6 +112,7 @@ bool francotirador(struct Juego *j, int dx, int dy) {
         Celda *c = (Celda*)j->t->celdas[b_y][b_x];
         if(c->pieza != NULL && c->pieza->tipo != 'R'){
             c->pieza->hp -= 3;
+            reportar_impacto(c->pieza->tipo, c->pieza->hp, 3);
             if (c->pieza->hp <= 0){ 
                 free(c->pieza); 
                 c->pieza = NULL; 
@@ -84,8 +120,10 @@ bool francotirador(struct Juego *j, int dx, int dy) {
             return true;
         }
     }
+    printf("\n❌ SNIPER: Disparo perdido en el vacío...\n");
     return true;
 }
+
 /*
 ***
 Parametro 1: struct Juego *j
@@ -107,6 +145,7 @@ bool granada(struct Juego *j, int dx, int dy) {
             Celda *c = (Celda*)j->t->celdas[y][x];
             if(c->pieza != NULL && c->pieza->tipo != 'R') {
                 c->pieza->hp -= 2;
+                reportar_impacto(c->pieza->tipo, c->pieza->hp, 2);
                 if (c->pieza->hp <= 0) { 
                     free(c->pieza); 
                     c->pieza = NULL; 
@@ -116,6 +155,7 @@ bool granada(struct Juego *j, int dx, int dy) {
     }
     return true;
 }
+
 /*
 ***
 Parametro 1: struct Juego *j
@@ -152,7 +192,8 @@ bool especial(struct Juego *j, int dx, int dy) {
         
         Celda *c_r = (Celda*)j->t->celdas[ey][ex];
         if(c_r->pieza != NULL && c_r->pieza->tipo != 'R') {
-            c_r->pieza->hp -= 2; 
+            c_r->pieza->hp -= 2;
+            reportar_impacto(c_r->pieza->tipo, c_r->pieza->hp, 2);
             if (c_r->pieza->hp <= 0) { 
                 free(c_r->pieza); 
                 c_r->pieza = NULL; 

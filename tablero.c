@@ -3,6 +3,41 @@
 #include "tablero.h"
 #include "piezas.h"
 #include "main.h"
+
+/*
+***
+Parametro 1: struct juego *juego
+***
+Retorno: void
+***
+Esta funcion se encarga de contar los enemigos, mostrar en pantalla los restantes y el tipo de enemigo.
+*/
+static void contar_enemigos(struct Juego *juego) {
+    int p=0, c=0, a=0, t=0, q=0;
+    Tablero *tablero = juego->t;
+    
+    for(int y=0; y<tablero->H; y++) {
+        for(int x=0; x<tablero->W; x++) {
+            Celda *celda = (Celda*)tablero->celdas[y][x];
+            if(celda->pieza && celda->pieza->tipo != 'R') {
+                switch(celda->pieza->tipo) {
+                    case 'P': p++; break;
+                    case 'C': c++; break;
+                    case 'A': a++; break;
+                    case 'T': t++; break;
+                    case 'Q': q++; break;
+                }
+            }
+        }
+    }
+    
+    int total = p + c + a + t + q;
+    
+    printf("\n ENEMIGOS RESTANTES: %d\n", total);
+    printf("  Peones: %d | Caballos: %d | Alfiles: %d | Torres: %d | Reinas: %d\n", 
+           p, c, a, t, q);
+}
+
 /*
 ***
 Parametro 1: int ancho

@@ -1,19 +1,19 @@
 Tarea 2 Lenguajes de Programacion
-Nombre: Emilio Alfonso Araya Guzman  
+Nombre alumno: Emilio Alfonso Araya Guzman  
 Rol: 202473561-6
 
 ---
 
-Intrucciones para compilacion:
+Intrucciones para compilacion correcta:
 - Todos los archivos ('.c', '.h' y 'Makefile') deben estar en la misma carpeta.
 - Compilador GCC con estándar C11.
-- Sistema Linux o WSL (Ubuntu). (Al menos fue probado en este)
+- Sistema Linux o WSL (Ubuntu). (Al menos fue probado el codigo en este)
 
 Pasos para compilar y ejecutar
 1. Abra la terminal en la carpeta del proyecto
 2. Compile con: 'make'
 3. Ejecute el juego con: './juego'
-4. Para limpiar archivos temporales: 'make clean'
+4. (Opcional) Para limpiar archivos temporales: 'make clean'
 
 En caso de no compilar
 - Verifique estar en Linux/WSL
@@ -36,7 +36,7 @@ En 'armas.c', la función 'especial()' utiliza un bucle que simula el movimiento
 
 Consideraciones Importantes
 
-1. Funciones internas (static void): Se utilizaron funciones privadas para modularizar el codigo sin alterar los encabezados requeridos por el pdf, es decir asi no alteramos el original. Esto mantiene el código ordenado.
+1. Funciones internas (static void): Se utilizaron funciones privadas para modularizar y tener unas funciones que nos faciliten el trabajo en el codigo sin alterar los encabezados requeridos por el pdf, es decir asi no alteramos el original. Esto fue con el objetivo de mantiene el código ordenado.
 
 2. Pantalla clara: El juego usa 'system("clear")' para refrescar la pantalla. Por esto es imprescindible ejecutarlo en Linux o WSL.
 
