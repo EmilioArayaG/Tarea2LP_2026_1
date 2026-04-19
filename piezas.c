@@ -44,19 +44,27 @@ static void mover_peon(struct Juego *juego, Pieza *p) {
     Tablero *t = juego->t;
     int diff_x = rey->x - p->x;
     int diff_y = rey->y - p->y;
-    int nx = p->x, ny = p->y;
+    int nx = p->x;
+    int ny = p->y;
 
     if (abs(diff_x) <= 1 && abs(diff_y) <= 1 && diff_y != 0) {
         nx = rey->x;
         ny = rey->y;
     } else {
         if (abs(diff_x) > abs(diff_y)) {
-            nx += (diff_x > 0) ? 1 : -1;
+            if (diff_x > 0) {
+                nx = nx + 1;
+            } else {
+                nx = nx - 1;
+            }
         } else {
-            ny += (diff_y > 0) ? 1 : -1;
+            if (diff_y > 0) {
+                ny = ny + 1;
+            } else {
+                ny = ny - 1;
+            }
         }
-    }
-    
+    }  
     Celda *dest = (Celda*)t->celdas[ny][nx];
     if(!dest->pieza || dest->pieza->tipo == 'R') {
         Celda *c = (Celda*)t->celdas[p->y][p->x];

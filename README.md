@@ -40,4 +40,6 @@ Consideraciones Importantes
 
 2. Pantalla clara: El juego usa 'system("clear")' para refrescar la pantalla. Por esto es imprescindible ejecutarlo en Linux o WSL.
 
+3. Al momento de disparar un arma en caso de impactar o no hice un getchar(), esto es porque con el system("clear") no me lograba aprecer lo suficientemente claro el reporte en pantalla, por eso al disparar pide un ENTER para continuar con el juego. 
+
 ---

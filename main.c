@@ -74,6 +74,10 @@ int main() {
                 juego.arsenal.disparar[in_arma](&juego, direc_x, direc_y);
                 juego.arsenal.municion_actual[in_arma]--;
                 turno_valido = true;
+                printf("\n(Presione ENTER para continuar con el turno...)\n");
+                int c_p;
+                while ((c_p = getchar()) != '\n' && c_p != EOF); 
+                getchar();
             } else {
                 continue;
             }

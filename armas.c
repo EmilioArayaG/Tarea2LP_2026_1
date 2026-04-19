@@ -14,23 +14,24 @@ Retorno: void
 Esta funcion reporta el impacto de un disparo mostrando el tipo de enemigo dañado, el daño infligido y los puntos de vida restantes. 
 */
 static void reportar_impacto(char tipo_enemigo, int hp_actual, int daño) {
-    const char *nombre[] = {"Peón", "Caballo", "Alfil", "Torre", "Reina"};
-    char tipos[] = "PCATQ";
+    printf("\n ¡IMPACTO! Daño: %d HP | ", daño);
     
-    int idx = -1;
-    for(int i = 0; i < 5; i++) {
-        if(tipos[i] == tipo_enemigo) { idx = i; break; }
-    }
-    
-    if(idx == -1) return;
-    
-    printf("\n ¡IMPACTO! ");
-    printf("Daño: %d HP | ", daño);
-    
-    if(hp_actual <= 0) {
-        printf("%s DESTRUIDO (HP = 0/%d)\n", nombre[idx], daño);
+    if (hp_actual <= 0) {
+        switch(tipo_enemigo) {
+            case 'P': printf("Peón DESTRUIDO (HP = 0/%d)\n", daño); break;
+            case 'C': printf("Caballo DESTRUIDO (HP = 0/%d)\n", daño); break;
+            case 'A': printf("Alfil DESTRUIDO (HP = 0/%d)\n", daño); break;
+            case 'T': printf("Torre DESTRUIDA (HP = 0/%d)\n", daño); break;
+            case 'Q': printf("Reina DESTRUIDA (HP = 0/%d)\n", daño); break;
+        }
     } else {
-        printf("%s herido (HP = %d)\n", nombre[idx], hp_actual);
+        switch(tipo_enemigo) {
+            case 'P': printf("Peón herido (HP = %d)\n", hp_actual); break;
+            case 'C': printf("Caballo herido (HP = %d)\n", hp_actual); break;
+            case 'A': printf("Alfil herido (HP = %d)\n", hp_actual); break;
+            case 'T': printf("Torre herida (HP = %d)\n", hp_actual); break;
+            case 'Q': printf("Reina herida (HP = %d)\n", hp_actual); break;
+        }
     }
 }
 
