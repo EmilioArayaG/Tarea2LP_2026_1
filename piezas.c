@@ -10,7 +10,7 @@ Parametro 4: int fila_y
 ***
 Retorno: void
 ***
-Esta funcion recibe el estado del juego, el caracter que representa a la pieza, sus puntos de vida y la fila del tablero donde debe aparecer. Realiza una busqueda de una celda vacia de forma aleatoria en la fila especificada y asigna memoria dinamica en el heap para instanciar la nueva pieza, colocandola en el tablero.
+Esta funcion recibe el estado del juego, el caracter que representa a la pieza, sus puntos de vida y la fila del tablero donde debe aparecer. Realiza una busqueda de una celda vacia de forma aleatoria en la fila especificada y asigna memoria dinamica en el heap para instanciar la nueva pieza, para despues colocarla en el tablero.
 */
 static void invocar_pieza(struct Juego *juego, char tipo, int hp, int fila_y) {
     int r_x;
