@@ -95,6 +95,8 @@ void tablero_imprimir(struct Juego *juego) {
         else printf(" %d ", x + 1);
     }
     printf("\n\n");
+
+    contar_enemigos(juego);
 }
 /*
 ***
